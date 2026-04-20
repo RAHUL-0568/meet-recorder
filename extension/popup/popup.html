@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=380, initial-scale=1.0">
+  <title>Meet Recorder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="11" stroke="url(#grad)" stroke-width="2"/>
+            <circle cx="12" cy="12" r="5" fill="url(#grad)"/>
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="24" y2="24">
+                <stop offset="0%" stop-color="#8B5CF6"/>
+                <stop offset="100%" stop-color="#06B6D4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="logo-text">Meet Recorder</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="status-dot" id="statusDot"></div>
+      </div>
+    </header>
+
+    <!-- Meet Detection Banner -->
+    <div class="meet-banner" id="meetBanner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 10l5-3v10l-5-3"/>
+        <rect x="2" y="6" width="13" height="12" rx="2"/>
+      </svg>
+      <span id="meetStatus">Detecting Google Meet...</span>
+    </div>
+
+    <!-- Recording Controls -->
+    <div class="controls-section">
+      <!-- Timer Display -->
+      <div class="timer-container" id="timerContainer">
+        <div class="timer-ring" id="timerRing">
+          <svg viewBox="0 0 120 120" class="timer-svg">
+            <circle cx="60" cy="60" r="54" class="timer-track"/>
+            <circle cx="60" cy="60" r="54" class="timer-progress" id="timerProgress"/>
+          </svg>
+          <div class="timer-display">
+            <span class="timer-value" id="timerValue">00:00</span>
+            <span class="timer-label" id="timerLabel">Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Record Button -->
+      <button class="record-btn" id="recordBtn" title="Start Recording">
+        <div class="record-btn-inner" id="recordBtnInner">
+          <div class="record-icon" id="recordIcon"></div>
+        </div>
+      </button>
+      <div class="recording-controls" id="recordingControls">
+        <button class="control-btn pause-btn" id="pauseBtn" disabled>Pause</button>
+        <button class="control-btn stop-btn" id="stopBtn" disabled>Stop</button>
+      </div>
+      <p class="record-hint" id="recordHint">Click to start recording</p>
+    </div>
+
+    <!-- Options -->
+    <div class="options-section">
+      <label class="toggle-option" id="micToggle">
+        <div class="toggle-info">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+          <span>Include Microphone</span>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" id="micCheckbox" checked>
+          <span class="toggle-slider"></span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Recent Recordings -->
+    <div class="recordings-section">
+      <div class="section-header">
+        <h3>Recent Recordings</h3>
+        <span class="recording-count" id="recordingCount">0</span>
+      </div>
+      <div class="recordings-list" id="recordingsList">
+        <div class="empty-state" id="emptyState">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <polygon points="10,8 16,12 10,16"/>
+          </svg>
+          <p>No recordings yet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="#" id="openDashboard" class="footer-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        Open Dashboard
+      </a>
+      <span class="version">v1.0.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
