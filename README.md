@@ -1,61 +1,99 @@
-# 🎙️ Meet Recorder - Chrome Extension
+# 🎙️ Meet Recorder
 
-Record your Google Meet sessions with ease. Captures tab audio and microphone, then syncs recordings to your personal dashboard.
+Meet Recorder is a Chrome extension + Next.js dashboard for recording Google Meet audio, uploading recordings to Supabase, and reviewing them in a personal dashboard.
 
-## 🚀 How to Install (Free)
+## 📦 Project Structure
 
-### Step 1: Download
-- Click the green **"Code"** button above → **"Download ZIP"**
-- Or clone the repo: `git clone https://github.com/YOUR_USERNAME/meet-recorder.git`
+```text
+meet-recorder/
+├── extension/   # Chrome extension (Manifest V3)
+└── dashboard/   # Next.js dashboard + APIs + auth
+```
 
-### Step 2: Install the Extension
-1. Unzip the downloaded file
-2. Open **Google Chrome**
-3. Go to `chrome://extensions` in the address bar
-4. Enable **Developer Mode** (toggle in the top-right corner)
-5. Click **"Load unpacked"**
-6. Select the `extension` folder from the unzipped files
-7. ✅ The Meet Recorder icon will appear in your toolbar!
+## ✅ Current Dashboard Flow
 
-### Step 3: Pin the Extension
-- Click the **puzzle piece** icon in Chrome's toolbar
-- Click the **pin** icon next to "Meet Recorder"
+- Landing page with **Add to Chrome** download action
+- Google OAuth sign-in via NextAuth
+- Upload recordings to `POST /api/recordings`
+- Recordings list and playback pages
+- Delete recording support from dashboard
 
-## 🎬 How to Use
-1. Join a Google Meet call
-2. Click the Meet Recorder extension icon
-3. Click **Record** to start recording
-4. Click **Stop** when you're done
-5. Your recording will be saved and synced to the dashboard
+## 🚀 Local Setup
 
-## 📊 Dashboard Setup (Optional)
-The dashboard lets you view, play, and manage all your recordings.
+### 1) Install dashboard dependencies
 
-1. Navigate to the `dashboard` folder
-2. Run `npm install`
-3. Create a `.env.local` file with your Supabase credentials
-4. Run `npm run dev`
-5. Open `http://localhost:3000`
+```bash
+cd dashboard
+npm install
+```
+
+### 2) Configure environment (`dashboard/.env.local`)
+
+```env
+DATABASE_URL=postgresql://...
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-random-secret
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+### 3) Generate Prisma client and run migrations
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
+```
+
+### 4) Run dashboard
+
+```bash
+npm run dev
+```
+
+Open: `http://localhost:3000`
+
+> Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin.
+
+## 🧩 Install Chrome Extension
+
+### Option A: from dashboard (recommended)
+1. Open `http://localhost:3000`
+2. Click **Add to Chrome — It's Free** to download the zip
+3. Unzip it locally
+4. Go to `chrome://extensions`
+5. Enable **Developer mode**
+6. Click **Load unpacked** and select the unzipped extension folder
+
+### Option B: direct from repo
+1. Go to `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select `/extension`
+
+## 🎬 Usage
+
+1. Sign in on `http://localhost:3000`
+2. Open a Google Meet tab
+3. Start recording from the extension popup
+4. Stop recording when done
+5. Recording is downloaded locally and uploaded to dashboard storage
+6. Open `/recordings` to review playback
+
+## 🧪 Integration Testing Checklist (Local)
+
+Use this to verify extension ↔ dashboard integration after setup:
+
+1. **Auth bridge:** Sign in on dashboard, open extension popup, ensure it does not ask you to log in again
+2. **Record upload:** Start and stop a short recording from Google Meet
+3. **API success:** Confirm `POST /api/recordings` returns success in dashboard logs/network
+4. **Dashboard list:** Confirm new recording appears on `/recordings`
+5. **Playback page:** Open the recording and verify audio playback works
+6. **Delete flow:** Delete recording and verify it disappears from the list
 
 ## ⚠️ Notes
-- This extension works in **Developer Mode** only (not from Chrome Web Store)
-- Chrome may show a warning about developer mode extensions — this is normal and safe
-- The extension requires microphone permission to record audio
 
-## 📁 Project Structure
-```
-chromomo/
-├── extension/          # Chrome extension files
-│   ├── manifest.json   # Extension configuration
-│   ├── background.js   # Service worker
-│   ├── offscreen.js    # Audio recording engine
-│   ├── popup/          # Extension popup UI
-│   └── icons/          # Extension icons
-└── dashboard/          # Next.js web dashboard
-```
-
-## 🛠️ Built With
-- Chrome Extensions API (Manifest V3)
-- MediaRecorder API
-- Next.js Dashboard
-- Supabase (Auth + Storage)
+- Extension is intended for developer-mode local usage right now
+- Dashboard and extension host permissions are currently configured for `localhost:3000`
+- Microphone permission is required when recording with mic enabled
