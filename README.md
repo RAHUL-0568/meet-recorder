@@ -39,7 +39,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
-- `DATABASE_URL`: use your Postgres connection string (for example, Supabase Project Settings → Database connection string)
+- `DATABASE_URL`: use a direct PostgreSQL connection URL compatible with Prisma (for Supabase, use the Postgres URI from Project Settings → Database)
 - `NEXTAUTH_SECRET`: use a strong random secret (example: `openssl rand -base64 32`)
 
 ### 3) Generate Prisma client and run migrations
@@ -57,7 +57,7 @@ npm run dev
 
 Open: `http://localhost:3000`
 
-> Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin in `extension/manifest.json`, `extension/offscreen.js`, and `extension/popup/popup.js`. If you change the dashboard URL, update all three locations together.
+> Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin in `extension/manifest.json`, `extension/offscreen.js`, and `extension/popup/popup.js`. This is known technical debt; if you change the dashboard URL, update all three locations together.
 
 ## 🧩 Install Chrome Extension
 
