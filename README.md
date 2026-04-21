@@ -39,6 +39,9 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
+- `DATABASE_URL`: use your Postgres connection string (for example, Supabase Project Settings → Database connection string)
+- `NEXTAUTH_SECRET`: use a strong random secret (example: `openssl rand -base64 32`)
+
 ### 3) Generate Prisma client and run migrations
 
 ```bash
@@ -96,4 +99,5 @@ Use this to verify extension ↔ dashboard integration after setup:
 
 - Extension is intended for developer-mode local usage right now
 - Dashboard and extension host permissions are currently configured for `localhost:3000`
+- `localhost:3000` wiring is a current implementation limitation (URL appears in multiple extension files)
 - Microphone permission is required when recording with mic enabled
