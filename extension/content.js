@@ -1,97 +1,167 @@
-// ============================================================
-// Meet Recorder — Content Script
-// Injected into Google Meet pages
-// Detects active meetings and shows recording indicator
-// ============================================================
+// Meet Recorder - Content Script
+// Shows an in-page recording indicator on Google Meet and keeps it synced to extension state.
 
 let isRecording = false;
+let isPaused = false;
 let indicatorElement = null;
+let indicatorTimer = null;
+let indicatorStartTime = null;
+let pauseStartedAt = null;
+let totalPausedMs = 0;
 
-// -----------------------------------------------------------
-// Create Floating Recording Indicator
-// -----------------------------------------------------------
 function createIndicator() {
-  if (indicatorElement) return;
+  if (indicatorElement) {
+    return indicatorElement;
+  }
 
   indicatorElement = document.createElement('div');
   indicatorElement.id = 'meet-recorder-indicator';
   indicatorElement.innerHTML = `
-    <div class="mr-indicator-dot"></div>
-    <span class="mr-indicator-text">REC</span>
+    <div class="mr-indicator-dot" id="mr-indicator-dot"></div>
+    <span class="mr-indicator-text" id="mr-indicator-text">REC</span>
     <span class="mr-indicator-timer" id="mr-timer">00:00</span>
   `;
 
   document.body.appendChild(indicatorElement);
+  return indicatorElement;
 }
 
 function removeIndicator() {
-  if (indicatorElement) {
-    indicatorElement.remove();
-    indicatorElement = null;
+  if (!indicatorElement) {
+    return;
   }
-}
 
-// -----------------------------------------------------------
-// Timer in Indicator
-// -----------------------------------------------------------
-let indicatorInterval = null;
-let indicatorStartTime = null;
-
-function startIndicatorTimer() {
-  indicatorStartTime = Date.now();
-  indicatorInterval = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - indicatorStartTime) / 1000);
-    const timer = document.getElementById('mr-timer');
-    if (timer) {
-      const mins = Math.floor(elapsed / 60);
-      const secs = elapsed % 60;
-      timer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-  }, 1000);
+  indicatorElement.remove();
+  indicatorElement = null;
 }
 
 function stopIndicatorTimer() {
-  if (indicatorInterval) {
-    clearInterval(indicatorInterval);
-    indicatorInterval = null;
+  if (indicatorTimer) {
+    clearInterval(indicatorTimer);
+    indicatorTimer = null;
   }
 }
 
-// -----------------------------------------------------------
-// Message Listener
-// -----------------------------------------------------------
+function formatTime(totalSeconds) {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function getElapsedSeconds() {
+  if (!indicatorStartTime) {
+    return 0;
+  }
+
+  const activePauseMs = isPaused && pauseStartedAt ? Date.now() - pauseStartedAt : 0;
+  const elapsedMs = Math.max(
+    0,
+    Date.now() - indicatorStartTime - totalPausedMs - activePauseMs
+  );
+
+  return Math.floor(elapsedMs / 1000);
+}
+
+function renderIndicator() {
+  if (!isRecording) {
+    stopIndicatorTimer();
+    removeIndicator();
+    return;
+  }
+
+  createIndicator();
+
+  const text = document.getElementById('mr-indicator-text');
+  const dot = document.getElementById('mr-indicator-dot');
+  const timer = document.getElementById('mr-timer');
+
+  if (text) {
+    text.textContent = isPaused ? 'PAUSED' : 'REC';
+    text.classList.toggle('paused', isPaused);
+  }
+
+  if (dot) {
+    dot.classList.toggle('paused', isPaused);
+  }
+
+  if (indicatorElement) {
+    indicatorElement.classList.toggle('paused', isPaused);
+  }
+
+  if (timer) {
+    timer.textContent = formatTime(getElapsedSeconds());
+  }
+
+  stopIndicatorTimer();
+
+  if (!isPaused) {
+    indicatorTimer = setInterval(() => {
+      const liveTimer = document.getElementById('mr-timer');
+      if (liveTimer) {
+        liveTimer.textContent = formatTime(getElapsedSeconds());
+      }
+    }, 1000);
+  }
+}
+
+function applyRecordingState(state) {
+  isRecording = Boolean(state.recording);
+  isPaused = Boolean(state.recordingPaused);
+  indicatorStartTime = state.recordingStartTime || null;
+  pauseStartedAt = state.pauseStartedAt || null;
+  totalPausedMs = state.totalPausedMs || 0;
+  renderIndicator();
+}
+
+async function syncFromStorage() {
+  const stored = await chrome.storage.local.get([
+    'recording',
+    'recordingStartTime',
+    'recordingPaused',
+    'pauseStartedAt',
+    'totalPausedMs',
+  ]);
+
+  applyRecordingState(stored);
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'recording-status') {
-    isRecording = message.recording;
+  if (message.type !== 'recording-status') {
+    return false;
+  }
 
-    if (isRecording) {
-      createIndicator();
-      startIndicatorTimer();
-    } else {
-      stopIndicatorTimer();
-      removeIndicator();
-    }
+  applyRecordingState(message);
+  sendResponse({ success: true });
+  return true;
+});
 
-    sendResponse({ success: true });
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local') {
+    return;
+  }
+
+  if (
+    changes.recording ||
+    changes.recordingStartTime ||
+    changes.recordingPaused ||
+    changes.pauseStartedAt ||
+    changes.totalPausedMs
+  ) {
+    syncFromStorage().catch(() => {});
   }
 });
 
-// -----------------------------------------------------------
-// Detect Meeting State
-// -----------------------------------------------------------
 function detectMeeting() {
-  // Check if we're in an active meeting by looking for known Meet UI elements
-  const inMeeting = !!(
+  return Boolean(
     document.querySelector('[data-meeting-title]') ||
-    document.querySelector('[data-call-ended]') === null &&
-    document.querySelector('[jscontroller]') &&
-    window.location.pathname.match(/\/[a-z]{3}-[a-z]{4}-[a-z]{3}/)
+      (
+        document.querySelector('[data-call-ended]') === null &&
+        document.querySelector('[jscontroller]') &&
+        window.location.pathname.match(/\/[a-z]{3}-[a-z]{4}-[a-z]{3}/)
+      )
   );
-
-  return inMeeting;
 }
 
-// Send meeting info to background on load
 function sendMeetingInfo() {
   const meetingCode = window.location.pathname.split('/').pop();
   const titleEl = document.querySelector('[data-meeting-title]');
@@ -103,33 +173,13 @@ function sendMeetingInfo() {
       meetingCode,
       title,
       url: window.location.href,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   }).catch(() => {});
 }
 
-// Check meeting state on load
 if (detectMeeting()) {
   sendMeetingInfo();
 }
 
-// -----------------------------------------------------------
-// On page load, sync recording state
-// -----------------------------------------------------------
-chrome.storage.local.get(['recording', 'recordingStartTime'], (stored) => {
-  if (stored.recording) {
-    isRecording = true;
-    createIndicator();
-    indicatorStartTime = stored.recordingStartTime || Date.now();
-
-    indicatorInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - indicatorStartTime) / 1000);
-      const timer = document.getElementById('mr-timer');
-      if (timer) {
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        timer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      }
-    }, 1000);
-  }
-});
+syncFromStorage().catch(() => {});

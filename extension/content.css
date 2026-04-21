@@ -25,6 +25,11 @@
   pointer-events: none;
 }
 
+#meet-recorder-indicator.paused {
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
 @keyframes mr-slide-in {
   from {
     opacity: 0;
@@ -45,6 +50,12 @@
   animation: mr-pulse 1.5s ease-in-out infinite;
 }
 
+.mr-indicator-dot.paused {
+  background: #F59E0B;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.45);
+  animation: none;
+}
+
 @keyframes mr-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.2); }
@@ -56,6 +67,10 @@
   color: #EF4444;
   letter-spacing: 1.5px;
   text-transform: uppercase;
+}
+
+.mr-indicator-text.paused {
+  color: #F59E0B;
 }
 
 .mr-indicator-timer {
