@@ -54,7 +54,7 @@ npm run dev
 
 Open: `http://localhost:3000`
 
-> Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin in the repository-relative files `extension/manifest.json`, `extension/offscreen.js`, and `extension/popup/popup.js`. If you change the dashboard URL, update all three locations together (simple one-file change is not enough).
+> Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin in `extension/manifest.json`, `extension/offscreen.js`, and `extension/popup/popup.js`. If you change the dashboard URL, update all three locations together.
 
 ## 🧩 Install Chrome Extension
 
