@@ -9,6 +9,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   (async () => {
     try {
+      // 🎤 MIC PERMISSION REQUEST
+      if (message.type === "request-mic-permission") {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach((t) => t.stop());
+          sendResponse({ granted: true });
+        } catch (err) {
+          console.error("Mic permission denied:", err);
+          sendResponse({ granted: false, error: err.message });
+        }
+        return;
+      }
+
       // 🎬 START RECORDING
       if (message.type === "start-recording") {
         // ✅ PREVENT DOUBLE START
@@ -36,6 +49,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         const tabSource = audioContext.createMediaStreamSource(tabStream);
         tabSource.connect(destination);
+        tabSource.connect(audioContext.destination); // 🔊 Play tab audio to speakers
 
         let micEnabled = false;
 
@@ -73,8 +87,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           });
 
           const filename = `meet-${Date.now()}.webm`;
+          const recDuration = Math.floor((Date.now() - startTime) / 1000);
 
-          // ✅ DOWNLOAD
+          // ✅ DOWNLOAD locally
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
@@ -82,49 +97,48 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           a.click();
           setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-          // ✅ SEND TO BACKGROUND FIRST
+          // ☁️ UPLOAD TO SUPABASE BUCKET FIRST (before signaling complete)
+          let uploaded = false;
+          try {
+            const formData = new FormData();
+            formData.append("file", blob, filename);
+            formData.append("title", "Google Meet Recording");
+            formData.append("duration", recDuration);
+
+            const res = await fetch("http://localhost:3000/api/recordings", {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            });
+
+            const result = await res.json();
+            uploaded = result.success;
+            console.log(uploaded ? "✅ Uploaded to bucket" : "⚠️ Upload response:", result);
+          } catch (err) {
+            console.error("❌ Upload failed:", err);
+          }
+
+          // ✅ SIGNAL BACKGROUND ONLY AFTER UPLOAD FINISHES
           chrome.runtime.sendMessage({
             type: "recording-complete",
             data: {
               filename,
               fileSize: blob.size,
-              duration: Math.floor((Date.now() - startTime) / 1000),
+              duration: recDuration,
               hasMic: micEnabled,
+              uploaded,
               timestamp: new Date().toISOString(),
             },
           });
 
-          // 🔥 UPLOAD (NON-BLOCKING)
-          setTimeout(async () => {
-            try {
-              const formData = new FormData();
-              formData.append("file", blob, filename);
-              formData.append("title", "Google Meet Recording");
-              formData.append(
-                "duration",
-                Math.floor((Date.now() - startTime) / 1000),
-              );
-
-              await fetch("http://localhost:3000/api/recordings", {
-                method: "POST",
-                body: formData,
-                credentials: "include",
-              });
-
-              console.log("✅ Uploaded");
-            } catch (err) {
-              console.error("❌ Upload failed:", err);
-            }
-          }, 0);
-
-          // ✅ CLEANUP (FIXED)
+          // ✅ CLEANUP
           if (finalStream) {
             finalStream.getTracks().forEach((t) => t.stop());
             finalStream = null;
           }
 
           if (audioContext) {
-            audioContext.close(); // ✅ CRITICAL FIX
+            audioContext.close();
             audioContext = null;
           }
 
@@ -149,17 +163,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       // ⏸️ PAUSE
       if (message.type === "pause-recording") {
-        if (mediaRecorder?.state === "recording") {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
           mediaRecorder.pause();
           sendResponse({ success: true });
+        } else {
+          sendResponse({ success: false, error: "Cannot pause" });
         }
       }
 
       // ▶️ RESUME
       if (message.type === "resume-recording") {
-        if (mediaRecorder?.state === "paused") {
+        if (mediaRecorder && mediaRecorder.state === "paused") {
           mediaRecorder.resume();
           sendResponse({ success: true });
+        } else {
+          sendResponse({ success: false, error: "Cannot resume" });
         }
       }
     } catch (error) {

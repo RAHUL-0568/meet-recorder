@@ -197,6 +197,17 @@ recordBtn.addEventListener("click", async () => {
 
   recordBtn.disabled = false;
 
+  // 🔐 AUTH CHECK (ONLY ADDITION)
+  if (startResult?.requiresAuth) {
+    recordHint.textContent = "Login required";
+
+    chrome.tabs.create({
+      url: "http://localhost:3000",
+    });
+
+    return;
+  }
+
   if (startResult?.success) {
     isRecording = true;
     isPaused = false;

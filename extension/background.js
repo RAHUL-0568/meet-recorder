@@ -1,18 +1,112 @@
-// background.js (FINAL CLEAN VERSION)
+// background.js (FINAL CLEAN VERSION + AUTH + STATE PERSISTENCE)
 
 const OFFSCREEN_DOCUMENT_PATH = "offscreen.html";
 
 let recording = false;
 let recordingTabId = null;
+let recordingStartTime = null;
+let recordingPaused = false;
+let pauseStartedAt = null;
+let totalPausedMs = 0;
 
 // -------------------- INIT --------------------
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await chrome.storage.local.get(["recordings"]);
 
   if (!existing.recordings) {
     await chrome.storage.local.set({ recordings: [] });
   }
+
+  // Clear stale recording state on install/update
+  await clearRecordingState();
+
+  // Open welcome page on first install to request permissions
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
+  }
 });
+
+// Restore in-memory state when service worker wakes up
+chrome.runtime.onStartup.addListener(async () => {
+  await restoreRecordingState();
+});
+
+// Also restore immediately on script load (covers service worker restart)
+(async () => {
+  await restoreRecordingState();
+})();
+
+// -------------------- STATE PERSISTENCE --------------------
+async function saveRecordingState() {
+  await chrome.storage.local.set({
+    recording,
+    recordingStartTime,
+    recordingPaused,
+    pauseStartedAt,
+    totalPausedMs,
+  });
+}
+
+async function clearRecordingState() {
+  recording = false;
+  recordingTabId = null;
+  recordingStartTime = null;
+  recordingPaused = false;
+  pauseStartedAt = null;
+  totalPausedMs = 0;
+
+  await chrome.storage.local.set({
+    recording: false,
+    recordingStartTime: null,
+    recordingPaused: false,
+    pauseStartedAt: null,
+    totalPausedMs: 0,
+  });
+}
+
+async function restoreRecordingState() {
+  const stored = await chrome.storage.local.get([
+    "recording",
+    "recordingStartTime",
+    "recordingPaused",
+    "pauseStartedAt",
+    "totalPausedMs",
+  ]);
+  if (stored.recording) {
+    recording = true;
+    recordingStartTime = stored.recordingStartTime || null;
+    recordingPaused = Boolean(stored.recordingPaused);
+    pauseStartedAt = stored.pauseStartedAt || null;
+    totalPausedMs = stored.totalPausedMs || 0;
+    console.log("Restored recording state from storage");
+  }
+}
+
+// -------------------- AUTH CHECK --------------------
+async function isUserLoggedIn() {
+  try {
+    // Check for next-auth session cookie via chrome.cookies API
+    const cookie = await chrome.cookies.get({
+      url: "http://localhost:3000",
+      name: "next-auth.session-token",
+    });
+
+    if (cookie?.value) {
+      return true;
+    }
+
+    // Also check the secure variant
+    const secureCookie = await chrome.cookies.get({
+      url: "http://localhost:3000",
+      name: "__Secure-next-auth.session-token",
+    });
+
+    return !!secureCookie?.value;
+  } catch (err) {
+    console.error("Auth check error:", err);
+    return false;
+  }
+}
 
 // -------------------- OFFSCREEN --------------------
 async function createOffscreenDocument() {
@@ -37,6 +131,15 @@ async function closeOffscreenDocument() {
 
 // -------------------- START --------------------
 async function startRecording(tab, includeMic) {
+  const loggedIn = await isUserLoggedIn();
+  if (!loggedIn) {
+    return {
+      success: false,
+      error: "Login required",
+      requiresAuth: true,
+    };
+  }
+
   if (recording) {
     console.warn("Resetting stuck state");
     recording = false;
@@ -77,6 +180,12 @@ async function startRecording(tab, includeMic) {
 
     recording = true;
     recordingTabId = tab.id;
+    recordingStartTime = Date.now();
+    recordingPaused = false;
+    pauseStartedAt = null;
+    totalPausedMs = 0;
+
+    await saveRecordingState();
 
     return { success: true };
   } catch (e) {
@@ -93,8 +202,7 @@ async function stopRecording() {
       target: "offscreen",
     });
 
-    recording = false;
-    recordingTabId = null;
+    await clearRecordingState();
 
     return { success: true };
   } catch (e) {
@@ -113,6 +221,7 @@ async function saveRecordingMetadata(data) {
     filename: data.filename,
     duration: data.duration,
     fileSize: data.fileSize,
+    uploaded: data.uploaded || false,
     timestamp: new Date().toISOString(),
     hasMic: data.hasMic,
   });
@@ -127,6 +236,37 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ success: true });
       return;
 
+    // ✅ Return current recording state to popup
+    // If service worker was suspended, restore from storage first
+    case "get-status":
+      (async () => {
+        // If in-memory state was lost (service worker restarted), restore from storage
+        if (!recording && !recordingStartTime) {
+          const stored = await chrome.storage.local.get([
+            "recording",
+            "recordingStartTime",
+            "recordingPaused",
+            "pauseStartedAt",
+            "totalPausedMs",
+          ]);
+          if (stored.recording) {
+            recording = true;
+            recordingStartTime = stored.recordingStartTime || null;
+            recordingPaused = Boolean(stored.recordingPaused);
+            pauseStartedAt = stored.pauseStartedAt || null;
+            totalPausedMs = stored.totalPausedMs || 0;
+          }
+        }
+        sendResponse({
+          recording,
+          recordingStartTime,
+          recordingPaused,
+          pauseStartedAt,
+          totalPausedMs,
+        });
+      })();
+      return true;
+
     case "start-recording":
       chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         const res = await startRecording(tabs[0], Boolean(message.includeMic));
@@ -138,18 +278,79 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       stopRecording().then(sendResponse);
       return true;
 
+    case "pause-recording":
+      chrome.runtime
+        .sendMessage({
+          type: "pause-recording",
+          target: "offscreen",
+        })
+        .then((res) => {
+          if (res?.success) {
+            recordingPaused = true;
+            pauseStartedAt = Date.now();
+            saveRecordingState();
+          }
+          sendResponse(res);
+        });
+      return true;
+
+    case "resume-recording":
+      chrome.runtime
+        .sendMessage({
+          type: "resume-recording",
+          target: "offscreen",
+        })
+        .then((res) => {
+          if (res?.success) {
+            if (pauseStartedAt) {
+              totalPausedMs += Date.now() - pauseStartedAt;
+            }
+            recordingPaused = false;
+            pauseStartedAt = null;
+            saveRecordingState();
+          }
+          sendResponse(res);
+        });
+      return true;
+
     case "recording-complete":
       console.log("Recording done → saving");
 
-      // respond immediately (IMPORTANT)
       sendResponse({ success: true });
 
       (async () => {
         await saveRecordingMetadata(message.data);
+        await clearRecordingState();
         await closeOffscreenDocument();
       })();
 
       return true;
+
+    // ✅ Request mic permission via offscreen document
+    case "request-mic-permission":
+      (async () => {
+        try {
+          await createOffscreenDocument();
+          await new Promise((r) => setTimeout(r, 300));
+
+          const res = await chrome.runtime.sendMessage({
+            type: "request-mic-permission",
+            target: "offscreen",
+          });
+
+          await closeOffscreenDocument();
+          sendResponse({ granted: res?.granted || false });
+        } catch (err) {
+          console.error("Mic permission error:", err);
+          sendResponse({ granted: false, error: err.message });
+        }
+      })();
+      return true;
+
+    // ✅ Forward mic-permission-result from offscreen
+    case "mic-permission-result":
+      // Handled by the awaited sendMessage above
+      return;
 
     default:
       sendResponse({ success: false, error: "Unknown message" });
