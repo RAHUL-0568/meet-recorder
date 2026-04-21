@@ -28,14 +28,8 @@ Record your Google Meet sessions with ease. Captures tab audio and microphone, t
 4. Click **Stop** when you're done
 5. Your recording will be saved and synced to the dashboard
 
-## 📊 Dashboard Setup (Optional)
-The dashboard lets you view, play, and manage all your recordings.
-
-1. Navigate to the `dashboard` folder
-2. Run `npm install`
-3. Create a `.env.local` file with your Supabase credentials
-4. Run `npm run dev`
-5. Open `http://localhost:3000`
+## 📊 Dashboard
+The dashboard website is live, so you can use it directly to view, play, and manage your recordings.
 
 ## ⚠️ Notes
 - This extension works in **Developer Mode** only (not from Chrome Web Store)
