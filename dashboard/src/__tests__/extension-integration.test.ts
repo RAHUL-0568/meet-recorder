@@ -87,7 +87,7 @@ describe('Extension manifest.json integrity', () => {
 
   test('injects content.js into Google Meet tabs', () => {
     const meetScript = manifest.content_scripts.find((cs) =>
-      cs.matches.some((m) => m.includes('meet.google.com'))
+      cs.matches.some((m) => /^https:\/\/meet\.google\.com\//.test(m))
     );
     expect(meetScript).toBeDefined();
     expect(meetScript!.js).toContain('content.js');
@@ -95,7 +95,7 @@ describe('Extension manifest.json integrity', () => {
 
   test('injects dashboard-bridge.js into localhost:3000 tabs', () => {
     const dashScript = manifest.content_scripts.find((cs) =>
-      cs.matches.some((m) => m.includes('localhost:3000'))
+      cs.matches.some((m) => /^https?:\/\/localhost:3000\//.test(m))
     );
     expect(dashScript).toBeDefined();
     expect(dashScript!.js).toContain('dashboard-bridge.js');
