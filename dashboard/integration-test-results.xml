@@ -1,45 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="70" failures="4" errors="0" time="1.199">
-  <testsuite name="Extension manifest.json integrity" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:26:11" time="0.458" tests="36">
-    <testcase classname="Extension manifest.json integrity" name="uses Manifest V3" time="0.01">
+<testsuites name="jest tests" tests="70" failures="4" errors="0" time="1.572">
+  <testsuite name="GET /api/recordings/[id]" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:30:14" time="0.572" tests="10">
+    <testcase classname="GET /api/recordings/[id]" name="returns 401 when no session is present" time="0.015">
     </testcase>
-    <testcase classname="Extension manifest.json integrity" name="is named &quot;Meet Recorder&quot;" time="0.004">
+    <testcase classname="GET /api/recordings/[id]" name="returns 200 with recording data when found" time="0.002">
+    </testcase>
+    <testcase classname="GET /api/recordings/[id]" name="returns 404 when recording is not found" time="0.002">
+    </testcase>
+    <testcase classname="GET /api/recordings/[id]" name="returns 404 when recording belongs to a different user" time="0.002">
+    </testcase>
+    <testcase classname="GET /api/recordings/[id]" name="passes correct userId to Prisma query" time="0.003">
+    </testcase>
+    <testcase classname="DELETE /api/recordings/[id]" name="returns 401 when no session is present" time="0.002">
+    </testcase>
+    <testcase classname="DELETE /api/recordings/[id]" name="returns 404 when recording is not found" time="0.004">
+    </testcase>
+    <testcase classname="DELETE /api/recordings/[id]" name="deletes DB record and returns success" time="0.005">
+    </testcase>
+    <testcase classname="DELETE /api/recordings/[id]" name="still deletes DB record even when Supabase bucket delete fails" time="0.028">
+    </testcase>
+    <testcase classname="DELETE /api/recordings/[id]" name="does not attempt Supabase delete for non-Supabase URLs" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="Extension manifest.json integrity" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:30:14" time="0.62" tests="36">
+    <testcase classname="Extension manifest.json integrity" name="uses Manifest V3" time="0.006">
+    </testcase>
+    <testcase classname="Extension manifest.json integrity" name="is named &quot;Meet Recorder&quot;" time="0.001">
     </testcase>
     <testcase classname="Extension manifest.json integrity" name="has a semantic version" time="0.001">
     </testcase>
-    <testcase classname="Extension manifest.json integrity" name="declares required permissions" time="0.001">
+    <testcase classname="Extension manifest.json integrity" name="declares required permissions" time="0.002">
     </testcase>
     <testcase classname="Extension manifest.json integrity" name="grants host_permissions for meet.google.com and localhost:3000" time="0.001">
     </testcase>
     <testcase classname="Extension manifest.json integrity" name="registers background service worker as background.js" time="0.001">
     </testcase>
-    <testcase classname="Extension manifest.json integrity" name="registers popup as popup/popup.html" time="0.001">
+    <testcase classname="Extension manifest.json integrity" name="registers popup as popup/popup.html" time="0.003">
     </testcase>
     <testcase classname="Extension manifest.json integrity" name="injects content.js into Google Meet tabs" time="0.001">
     </testcase>
-    <testcase classname="Extension manifest.json integrity" name="injects dashboard-bridge.js into localhost:3000 tabs" time="0">
+    <testcase classname="Extension manifest.json integrity" name="injects dashboard-bridge.js into localhost:3000 tabs" time="0.001">
     </testcase>
     <testcase classname="Extension manifest.json integrity" name="declares dashboard-page-session.js as web_accessible_resource for localhost:3000" time="0.001">
     </testcase>
-    <testcase classname="background.js auth integration" name="file exists and is non-empty" time="0.003">
+    <testcase classname="background.js auth integration" name="file exists and is non-empty" time="0.002">
     </testcase>
     <testcase classname="background.js auth integration" name="checks next-auth.session-token cookie at localhost:3000" time="0.001">
     </testcase>
-    <testcase classname="background.js auth integration" name="also checks __Secure- cookie variant for HTTPS sessions" time="0.003">
+    <testcase classname="background.js auth integration" name="also checks __Secure- cookie variant for HTTPS sessions" time="0.001">
     </testcase>
-    <testcase classname="background.js auth integration" name="returns requiresAuth: true when user is not logged in" time="0">
+    <testcase classname="background.js auth integration" name="returns requiresAuth: true when user is not logged in" time="0.003">
     </testcase>
     <testcase classname="background.js auth integration" name="handles start-recording message and calls tabCapture" time="0.001">
     </testcase>
     <testcase classname="background.js auth integration" name="handles stop-recording, pause-recording, and resume-recording messages" time="0.001">
     </testcase>
-    <testcase classname="background.js auth integration" name="saves and restores recording state via chrome.storage" time="0">
+    <testcase classname="background.js auth integration" name="saves and restores recording state via chrome.storage" time="0.001">
     </testcase>
-    <testcase classname="background.js auth integration" name="emits recording-complete message after upload finishes" time="0.003">
+    <testcase classname="background.js auth integration" name="emits recording-complete message after upload finishes" time="0">
     </testcase>
     <testcase classname="background.js auth integration" name="responds to ping messages" time="0">
     </testcase>
-    <testcase classname="offscreen.js recording upload integration" name="file exists and is non-empty" time="0">
+    <testcase classname="offscreen.js recording upload integration" name="file exists and is non-empty" time="0.001">
     </testcase>
     <testcase classname="offscreen.js recording upload integration" name="uploads recording to the dashboard recordings API" time="0.001">
     </testcase>
@@ -47,101 +69,79 @@
     </testcase>
     <testcase classname="offscreen.js recording upload integration" name="sends credentials: include for session cookie forwarding" time="0.005">
     </testcase>
-    <testcase classname="offscreen.js recording upload integration" name="records in audio/webm format" time="0">
+    <testcase classname="offscreen.js recording upload integration" name="records in audio/webm format" time="0.001">
     </testcase>
     <testcase classname="offscreen.js recording upload integration" name="triggers recording-complete message after upload" time="0">
     </testcase>
-    <testcase classname="offscreen.js recording upload integration" name="also downloads recording locally (local backup)" time="0">
+    <testcase classname="offscreen.js recording upload integration" name="also downloads recording locally (local backup)" time="0.003">
     </testcase>
-    <testcase classname="offscreen.js recording upload integration" name="handles mic inclusion path" time="0">
+    <testcase classname="offscreen.js recording upload integration" name="handles mic inclusion path" time="0.001">
     </testcase>
-    <testcase classname="dashboard-bridge.js session sync" name="file exists and is non-empty" time="0.001">
+    <testcase classname="dashboard-bridge.js session sync" name="file exists and is non-empty" time="0">
     </testcase>
-    <testcase classname="dashboard-bridge.js session sync" name="listens for meet-recorder-dashboard-session messages" time="0">
+    <testcase classname="dashboard-bridge.js session sync" name="listens for meet-recorder-dashboard-session messages" time="0.001">
     </testcase>
     <testcase classname="dashboard-bridge.js session sync" name="injects dashboard-page-session.js as external script (CSP-safe)" time="0">
     </testcase>
-    <testcase classname="dashboard-bridge.js session sync" name="forwards userId and email to background script via chrome.runtime.sendMessage" time="0.004">
+    <testcase classname="dashboard-bridge.js session sync" name="forwards userId and email to background script via chrome.runtime.sendMessage" time="0.006">
     </testcase>
     <testcase classname="dashboard-bridge.js session sync" name="refreshes session probe periodically via setInterval" time="0">
     </testcase>
-    <testcase classname="dashboard-page-session.js NextAuth session read" name="file exists and is non-empty" time="0">
+    <testcase classname="dashboard-page-session.js NextAuth session read" name="file exists and is non-empty" time="0.001">
     </testcase>
-    <testcase classname="dashboard-page-session.js NextAuth session read" name="fetches session from /api/auth/session" time="0">
+    <testcase classname="dashboard-page-session.js NextAuth session read" name="fetches session from /api/auth/session" time="0.001">
     </testcase>
-    <testcase classname="dashboard-page-session.js NextAuth session read" name="posts userId and email to window using postMessage" time="0.001">
+    <testcase classname="dashboard-page-session.js NextAuth session read" name="posts userId and email to window using postMessage" time="0.011">
     </testcase>
     <testcase classname="dashboard-page-session.js NextAuth session read" name="uses window.location.origin as postMessage target (not wildcard)" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="GET /api/recordings/[id]" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:26:11" time="0.515" tests="10">
-    <testcase classname="GET /api/recordings/[id]" name="returns 401 when no session is present" time="0.01">
+  <testsuite name="POST /api/recordings" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:30:13" time="0.855" tests="12">
+    <testcase classname="POST /api/recordings" name="returns 401 when no session is present" time="0.015">
     </testcase>
-    <testcase classname="GET /api/recordings/[id]" name="returns 200 with recording data when found" time="0.002">
+    <testcase classname="POST /api/recordings" name="returns 400 when file is missing from the request" time="0.005">
     </testcase>
-    <testcase classname="GET /api/recordings/[id]" name="returns 404 when recording is not found" time="0.002">
+    <testcase classname="POST /api/recordings" name="returns 200 with recording data on successful upload" time="0.039">
     </testcase>
-    <testcase classname="GET /api/recordings/[id]" name="returns 404 when recording belongs to a different user" time="0.001">
+    <testcase classname="POST /api/recordings" name="returns 500 when Supabase upload fails" time="0.008">
     </testcase>
-    <testcase classname="GET /api/recordings/[id]" name="passes correct userId to Prisma query" time="0.004">
+    <testcase classname="POST /api/recordings" name="auto-creates bucket when it does not exist yet" time="0.01">
     </testcase>
-    <testcase classname="DELETE /api/recordings/[id]" name="returns 401 when no session is present" time="0.001">
+    <testcase classname="GET /api/recordings" name="returns 401 when no session is present" time="0.005">
     </testcase>
-    <testcase classname="DELETE /api/recordings/[id]" name="returns 404 when recording is not found" time="0.002">
-    </testcase>
-    <testcase classname="DELETE /api/recordings/[id]" name="deletes DB record and returns success" time="0.001">
-    </testcase>
-    <testcase classname="DELETE /api/recordings/[id]" name="still deletes DB record even when Supabase bucket delete fails" time="0.016">
-    </testcase>
-    <testcase classname="DELETE /api/recordings/[id]" name="does not attempt Supabase delete for non-Supabase URLs" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="POST /api/recordings" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:26:11" time="0.54" tests="12">
-    <testcase classname="POST /api/recordings" name="returns 401 when no session is present" time="0.01">
-    </testcase>
-    <testcase classname="POST /api/recordings" name="returns 400 when file is missing from the request" time="0.009">
-    </testcase>
-    <testcase classname="POST /api/recordings" name="returns 200 with recording data on successful upload" time="0.026">
-    </testcase>
-    <testcase classname="POST /api/recordings" name="returns 500 when Supabase upload fails" time="0.005">
-    </testcase>
-    <testcase classname="POST /api/recordings" name="auto-creates bucket when it does not exist yet" time="0.004">
-    </testcase>
-    <testcase classname="GET /api/recordings" name="returns 401 when no session is present" time="0.001">
-    </testcase>
-    <testcase classname="GET /api/recordings" name="returns recordings list with pagination total" time="0.004">
+    <testcase classname="GET /api/recordings" name="returns recordings list with pagination total" time="0.005">
     </testcase>
     <testcase classname="GET /api/recordings" name="cleans orphaned DB entries that lack valid Supabase URLs" time="0.002">
     </testcase>
-    <testcase classname="GET /api/recordings" name="returns empty recordings array when user has no recordings" time="0.002">
+    <testcase classname="GET /api/recordings" name="returns empty recordings array when user has no recordings" time="0.001">
     </testcase>
-    <testcase classname="DELETE /api/recordings" name="returns 401 when no session is present" time="0.001">
+    <testcase classname="DELETE /api/recordings" name="returns 401 when no session is present" time="0.002">
     </testcase>
-    <testcase classname="DELETE /api/recordings" name="returns 400 when id is missing" time="0.001">
+    <testcase classname="DELETE /api/recordings" name="returns 400 when id is missing" time="0.002">
     </testcase>
-    <testcase classname="DELETE /api/recordings" name="returns 404 when recording does not exist or belongs to another user" time="0.001">
+    <testcase classname="DELETE /api/recordings" name="returns 404 when recording does not exist or belongs to another user" time="0.002">
     </testcase>
   </testsuite>
-  <testsuite name="GET /api/debug/env" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:26:12" time="0.22" tests="8">
+  <testsuite name="GET /api/debug/env" errors="0" failures="0" skipped="0" timestamp="2026-04-22T06:30:14" time="0.227" tests="8">
     <testcase classname="GET /api/debug/env" name="responds with ok: true and expected env keys" time="0.006">
     </testcase>
-    <testcase classname="GET /api/debug/env" name="reports GOOGLE_CLIENT_ID as present and looksLikeAppsId when set" time="0.001">
+    <testcase classname="GET /api/debug/env" name="reports GOOGLE_CLIENT_ID as present and looksLikeAppsId when set" time="0.002">
     </testcase>
-    <testcase classname="GET /api/debug/env" name="masks GOOGLE_CLIENT_ID value and does not expose it in plain text" time="0.001">
+    <testcase classname="GET /api/debug/env" name="masks GOOGLE_CLIENT_ID value and does not expose it in plain text" time="0.002">
     </testcase>
     <testcase classname="GET /api/debug/env" name="masks NEXTAUTH_SECRET value" time="0.001">
     </testcase>
     <testcase classname="GET /api/debug/env" name="reports looksPlaceholder true for NEXTAUTH_SECRET containing placeholder text" time="0.001">
     </testcase>
-    <testcase classname="GET /api/debug/env" name="reports DATABASE_URL as not present when env var is unset" time="0.001">
+    <testcase classname="GET /api/debug/env" name="reports DATABASE_URL as not present when env var is unset" time="0.011">
     </testcase>
-    <testcase classname="GET /api/debug/env" name="reports NEXTAUTH_URL value directly (not masked)" time="0.009">
+    <testcase classname="GET /api/debug/env" name="reports NEXTAUTH_URL value directly (not masked)" time="0.001">
     </testcase>
     <testcase classname="GET /api/debug/env" name="reports looksPlaceholder true for DATABASE_URL with placeholder tokens" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="GET /api/download-extension" errors="0" failures="4" skipped="0" timestamp="2026-04-22T06:26:12" time="0.152" tests="4">
-    <testcase classname="GET /api/download-extension" name="returns 404 when extension folder does not exist" time="0.004">
+  <testsuite name="GET /api/download-extension" errors="0" failures="4" skipped="0" timestamp="2026-04-22T06:30:14" time="0.269" tests="4">
+    <testcase classname="GET /api/download-extension" name="returns 404 when extension folder does not exist" time="0.009">
       <failure>Error: expect(received).toMatch(expected)
 
 Expected pattern: /extension folder not found/i
@@ -169,7 +169,7 @@ Received string:  &quot;Extension not found. In production, place meet-recorder-
     at runTest (/home/runner/work/meet-recorder/meet-recorder/dashboard/node_modules/jest-runner/build/testWorker.js:343:7)
     at Object.worker (/home/runner/work/meet-recorder/meet-recorder/dashboard/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
     </testcase>
-    <testcase classname="GET /api/download-extension" name="archives from the correct extension directory path" time="0">
+    <testcase classname="GET /api/download-extension" name="archives from the correct extension directory path" time="0.001">
       <failure>TypeError: fs_1.default.readFileSync is not a function
     at GET (/home/runner/work/meet-recorder/meet-recorder/dashboard/src/app/api/download-extension/route.ts:19:20)
     at Object.&lt;anonymous&gt; (/home/runner/work/meet-recorder/meet-recorder/dashboard/src/__tests__/api.download-extension.test.ts:71:14)
@@ -189,7 +189,7 @@ Received string:  &quot;Extension not found. In production, place meet-recorder-
     at runTest (/home/runner/work/meet-recorder/meet-recorder/dashboard/node_modules/jest-runner/build/testWorker.js:343:7)
     at Object.worker (/home/runner/work/meet-recorder/meet-recorder/dashboard/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
     </testcase>
-    <testcase classname="GET /api/download-extension" name="resolves extension dir relative to the dashboard cwd" time="0">
+    <testcase classname="GET /api/download-extension" name="resolves extension dir relative to the dashboard cwd" time="0.001">
       <failure>TypeError: fs_1.default.readFileSync is not a function
     at GET (/home/runner/work/meet-recorder/meet-recorder/dashboard/src/app/api/download-extension/route.ts:19:20)
     at Object.&lt;anonymous&gt; (/home/runner/work/meet-recorder/meet-recorder/dashboard/src/__tests__/api.download-extension.test.ts:80:14)
