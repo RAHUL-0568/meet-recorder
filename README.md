@@ -2,6 +2,13 @@
 
 Meet Recorder is a Chrome extension + Next.js dashboard for recording Google Meet audio, uploading recordings to Supabase, and reviewing them in a personal dashboard.
 
+## 🛠️ Prerequisites
+
+- Node.js + npm
+- Google Chrome (Developer Mode enabled for local extension install)
+- Supabase project (database + storage)
+- Google OAuth credentials for NextAuth
+
 ## 📦 Project Structure
 
 ```text
@@ -58,6 +65,14 @@ npm run dev
 Open: `http://localhost:3000`
 
 > Keep the dashboard on `http://localhost:3000` in local development because the extension is currently wired to that origin in `extension/manifest.json`, `extension/offscreen.js`, and `extension/popup/popup.js`. This is known technical debt; if you change the dashboard URL, update all three locations together.
+
+### 5) Validate dashboard (recommended)
+
+```bash
+npm run lint
+npm run build
+npm test
+```
 
 ## 🧩 Install Chrome Extension
 
