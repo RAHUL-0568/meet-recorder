@@ -15,7 +15,7 @@
 
   "host_permissions": [
     "https://meet.google.com/*",
-    "http://localhost:3000/*",
+    "https://meet-recorder-mo5b.vercel.app/*",
     "https://*.vercel.app/*"
   ],
 
@@ -39,14 +39,14 @@
       "css": ["content.css"]
     },
     {
-      "matches": ["http://localhost:3000/*", "https://*.vercel.app/*"],
+      "matches": ["https://meet-recorder-mo5b.vercel.app/*", "https://*.vercel.app/*"],
       "js": ["dashboard-bridge.js"]
     }
   ],
   "web_accessible_resources": [
     {
       "resources": ["dashboard-page-session.js"],
-      "matches": ["http://localhost:3000/*", "https://*.vercel.app/*"]
+      "matches": ["https://meet-recorder-mo5b.vercel.app/*", "https://*.vercel.app/*"]
     }
   ],
 
