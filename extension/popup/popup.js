@@ -17,7 +17,7 @@ const micToggle = document.getElementById("micToggle");
 const recordingsList = document.getElementById("recordingsList");
 const recordingCount = document.getElementById("recordingCount");
 const openDashboardLink = document.getElementById("openDashboard");
-const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
+const DEFAULT_DASHBOARD_ORIGIN = "https://meet-recorder-mo5b.vercel.app";
 
 let isRecording = false;
 let isPaused = false;
