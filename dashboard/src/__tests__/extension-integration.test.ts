@@ -8,7 +8,7 @@
  *   1. manifest.json correctness (permissions, host_permissions, CSP rules)
  *   2. background.js auth check — cookie detection logic (unit-level)
  *   3. dashboard-page-session.js — publishes session via postMessage
- *   4. offscreen.js — recording upload URL hard-wired to http://localhost:3000
+ *   4. offscreen.js — recording upload URL built from configurable dashboard origin
  */
 
 import path from 'path';
@@ -68,11 +68,12 @@ describe('Extension manifest.json integrity', () => {
     );
   });
 
-  test('grants host_permissions for meet.google.com and localhost:3000', () => {
+  test('grants host_permissions for meet.google.com, localhost, and vercel apps', () => {
     expect(manifest.host_permissions).toEqual(
       expect.arrayContaining([
         'https://meet.google.com/*',
         'http://localhost:3000/*',
+        'https://*.vercel.app/*',
       ])
     );
   });
@@ -93,20 +94,22 @@ describe('Extension manifest.json integrity', () => {
     expect(meetScript!.js).toContain('content.js');
   });
 
-  test('injects dashboard-bridge.js into localhost:3000 tabs', () => {
+  test('injects dashboard-bridge.js into localhost and vercel dashboard tabs', () => {
     const dashScript = manifest.content_scripts.find((cs) =>
-      cs.matches.some((m) => /^https?:\/\/localhost:3000\//.test(m))
+      cs.matches.includes('http://localhost:3000/*')
     );
     expect(dashScript).toBeDefined();
     expect(dashScript!.js).toContain('dashboard-bridge.js');
+    expect(dashScript!.matches).toContain('https://*.vercel.app/*');
   });
 
-  test('declares dashboard-page-session.js as web_accessible_resource for localhost:3000', () => {
+  test('declares dashboard-page-session.js as web_accessible_resource for localhost and vercel', () => {
     const war = manifest.web_accessible_resources.find((w) =>
       w.resources.includes('dashboard-page-session.js')
     );
     expect(war).toBeDefined();
     expect(war!.matches).toContain('http://localhost:3000/*');
+    expect(war!.matches).toContain('https://*.vercel.app/*');
   });
 });
 
@@ -116,10 +119,11 @@ describe('background.js auth integration', () => {
     expect(src.length).toBeGreaterThan(0);
   });
 
-  test('checks next-auth.session-token cookie at localhost:3000', () => {
+  test('checks next-auth.session-token cookie using configured dashboard origin', () => {
     const src = readExtensionFile(BACKGROUND_JS);
     expect(src).toContain('next-auth.session-token');
-    expect(src).toContain('http://localhost:3000');
+    expect(src).toContain('dashboardOrigin');
+    expect(src).toContain('DEFAULT_DASHBOARD_ORIGIN');
   });
 
   test('also checks __Secure- cookie variant for HTTPS sessions', () => {
@@ -168,10 +172,11 @@ describe('offscreen.js recording upload integration', () => {
     expect(src.length).toBeGreaterThan(0);
   });
 
-  test('uploads recording to the dashboard recordings API', () => {
+  test('uploads recording to the dashboard recordings API using dashboard origin', () => {
     const src = readExtensionFile(OFFSCREEN_JS);
     expect(src).toContain('/api/recordings');
-    expect(src).toContain('http://localhost:3000');
+    expect(src).toContain('dashboardOrigin');
+    expect(src).toContain('DEFAULT_DASHBOARD_ORIGIN');
   });
 
   test('uses POST method for upload', () => {

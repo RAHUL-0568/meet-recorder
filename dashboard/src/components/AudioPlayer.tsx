@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type WaveSurfer from 'wavesurfer.js';
 
 interface AudioPlayerProps {
   src: string;
@@ -13,7 +14,7 @@ interface AudioPlayerProps {
 
 export default function AudioPlayer({ src, title }: AudioPlayerProps) {
   const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurferRef = useRef<any>(null);
+  const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -24,7 +25,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
   useEffect(() => {
     if (!waveformRef.current) return;
 
-    let ws: any;
+    let ws: WaveSurfer | null = null;
 
     const initWaveSurfer = async () => {
       const WaveSurfer = (await import('wavesurfer.js')).default;
@@ -42,28 +43,29 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
         normalize: true,
         backend: 'WebAudio',
       });
+      const wave = ws;
 
-      ws.load(src);
+      wave.load(src);
 
-      ws.on('ready', () => {
-        setDuration(ws.getDuration());
+      wave.on('ready', () => {
+        setDuration(wave.getDuration());
         setIsReady(true);
-        ws.setVolume(volume);
+        wave.setVolume(volume);
       });
 
-      ws.on('audioprocess', () => {
-        setCurrentTime(ws.getCurrentTime());
+      wave.on('audioprocess', () => {
+        setCurrentTime(wave.getCurrentTime());
       });
 
-      ws.on('seeking', () => {
-        setCurrentTime(ws.getCurrentTime());
+      wave.on('seeking', () => {
+        setCurrentTime(wave.getCurrentTime());
       });
 
-      ws.on('play', () => setIsPlaying(true));
-      ws.on('pause', () => setIsPlaying(false));
-      ws.on('finish', () => setIsPlaying(false));
+      wave.on('play', () => setIsPlaying(true));
+      wave.on('pause', () => setIsPlaying(false));
+      wave.on('finish', () => setIsPlaying(false));
 
-      wavesurferRef.current = ws;
+      wavesurferRef.current = wave;
     };
 
     initWaveSurfer();
@@ -71,6 +73,7 @@ export default function AudioPlayer({ src, title }: AudioPlayerProps) {
     return () => {
       if (ws) ws.destroy();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
   const togglePlayPause = () => {

@@ -63,7 +63,7 @@ export default function RecordingCard({
                   key={i}
                   className="rec-card-bar"
                   style={{
-                    height: `${20 + Math.sin(i * 0.8) * 60 + Math.random() * 20}%`,
+                    height: `${20 + Math.sin(i * 0.8) * 45 + ((i * 17) % 20)}%`,
                     animationDelay: `${i * 0.1}s`,
                   }}
                 />

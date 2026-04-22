@@ -1,6 +1,7 @@
 // background.js (FINAL CLEAN VERSION + AUTH + STATE PERSISTENCE)
 
 const OFFSCREEN_DOCUMENT_PATH = "offscreen.html";
+const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
 
 let recording = false;
 let recordingTabId = null;
@@ -12,9 +13,13 @@ let totalPausedMs = 0;
 // -------------------- INIT --------------------
 chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await chrome.storage.local.get(["recordings"]);
+  const dashboardOriginState = await chrome.storage.local.get(["dashboardOrigin"]);
 
   if (!existing.recordings) {
     await chrome.storage.local.set({ recordings: [] });
+  }
+  if (!dashboardOriginState.dashboardOrigin) {
+    await chrome.storage.local.set({ dashboardOrigin: DEFAULT_DASHBOARD_ORIGIN });
   }
 
   // Clear stale recording state on install/update
@@ -85,9 +90,12 @@ async function restoreRecordingState() {
 // -------------------- AUTH CHECK --------------------
 async function isUserLoggedIn() {
   try {
+    const { dashboardOrigin } = await chrome.storage.local.get("dashboardOrigin");
+    const dashboardBaseUrl = dashboardOrigin || DEFAULT_DASHBOARD_ORIGIN;
+
     // Check for next-auth session cookie via chrome.cookies API
     const cookie = await chrome.cookies.get({
-      url: "http://localhost:3000",
+      url: dashboardBaseUrl,
       name: "next-auth.session-token",
     });
 
@@ -97,7 +105,7 @@ async function isUserLoggedIn() {
 
     // Also check the secure variant
     const secureCookie = await chrome.cookies.get({
-      url: "http://localhost:3000",
+      url: dashboardBaseUrl,
       name: "__Secure-next-auth.session-token",
     });
 
@@ -324,6 +332,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         await closeOffscreenDocument();
       })();
 
+      return true;
+
+    case "dashboard-session":
+      (async () => {
+        try {
+          const senderUrl = sender?.url ? new URL(sender.url) : null;
+          const senderOrigin = senderUrl?.origin || null;
+          if (senderOrigin && /^https?:\/\//.test(senderOrigin)) {
+            await chrome.storage.local.set({ dashboardOrigin: senderOrigin });
+          }
+          sendResponse({ success: true });
+        } catch (error) {
+          sendResponse({ success: false, error: error?.message || "Failed to sync dashboard origin" });
+        }
+      })();
       return true;
 
     // ✅ Request mic permission via offscreen document

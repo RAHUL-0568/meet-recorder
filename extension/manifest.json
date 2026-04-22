@@ -15,7 +15,8 @@
 
   "host_permissions": [
     "https://meet.google.com/*",
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "https://*.vercel.app/*"
   ],
 
   "background": {
@@ -38,14 +39,14 @@
       "css": ["content.css"]
     },
     {
-      "matches": ["http://localhost:3000/*"],
+      "matches": ["http://localhost:3000/*", "https://*.vercel.app/*"],
       "js": ["dashboard-bridge.js"]
     }
   ],
   "web_accessible_resources": [
     {
       "resources": ["dashboard-page-session.js"],
-      "matches": ["http://localhost:3000/*"]
+      "matches": ["http://localhost:3000/*", "https://*.vercel.app/*"]
     }
   ],
 

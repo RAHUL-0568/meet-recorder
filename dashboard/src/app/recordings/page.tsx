@@ -19,22 +19,11 @@ interface Recording {
 }
 
 export default function RecordingsPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/");
-      return;
-    }
-
-    if (status === "authenticated") {
-      fetchRecordings();
-    }
-  }, [status]);
 
   const fetchRecordings = async () => {
     try {
@@ -50,6 +39,18 @@ export default function RecordingsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/");
+      return;
+    }
+
+    if (status === "authenticated") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchRecordings();
+    }
+  }, [router, status]);
 
   const handleDelete = async (id: string) => {
     try {

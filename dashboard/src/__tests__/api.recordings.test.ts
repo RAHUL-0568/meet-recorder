@@ -5,8 +5,6 @@
  * route handler logic can be exercised without live infrastructure.
  */
 
-import { NextResponse } from 'next/server';
-
 // ── Mock next-auth ──────────────────────────────────────────────────────────
 const mockGetServerSession = jest.fn();
 jest.mock('next-auth', () => ({
@@ -96,18 +94,6 @@ jest.mock('next-auth', () => ({
 import { POST, GET, DELETE } from '@/app/api/recordings/route';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function makeRequest(body: BodyInit | null = null, headers: Record<string, string> = {}) {
-  return new Request('http://localhost:3000/api/recordings', {
-    method: 'POST',
-    body,
-    headers,
-  });
-}
-
-function makeGetRequest() {
-  return new Request('http://localhost:3000/api/recordings', { method: 'GET' });
-}
-
 function makeDeleteRequest(body: object) {
   return new Request('http://localhost:3000/api/recordings', {
     method: 'DELETE',

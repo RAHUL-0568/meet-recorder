@@ -17,6 +17,7 @@ const micToggle = document.getElementById("micToggle");
 const recordingsList = document.getElementById("recordingsList");
 const recordingCount = document.getElementById("recordingCount");
 const openDashboardLink = document.getElementById("openDashboard");
+const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
 
 let isRecording = false;
 let isPaused = false;
@@ -200,9 +201,10 @@ recordBtn.addEventListener("click", async () => {
   // 🔐 AUTH CHECK (ONLY ADDITION)
   if (startResult?.requiresAuth) {
     recordHint.textContent = "Login required";
+    const dashboardUrl = await getDashboardOrigin();
 
     chrome.tabs.create({
-      url: "http://localhost:3000",
+      url: dashboardUrl,
     });
 
     return;
@@ -340,8 +342,15 @@ micCheckbox.addEventListener("change", () => {
 
 openDashboardLink.addEventListener("click", (event) => {
   event.preventDefault();
-  chrome.tabs.create({ url: "http://localhost:3000" });
+  getDashboardOrigin().then((dashboardUrl) => {
+    chrome.tabs.create({ url: dashboardUrl });
+  });
 });
+
+async function getDashboardOrigin() {
+  const stored = await chrome.storage.local.get("dashboardOrigin");
+  return stored.dashboardOrigin || DEFAULT_DASHBOARD_ORIGIN;
+}
 
 async function sendMessageWithRetry(message, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt += 1) {

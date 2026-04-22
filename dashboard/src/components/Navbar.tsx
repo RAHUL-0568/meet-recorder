@@ -51,6 +51,7 @@ export default function Navbar() {
           ) : session?.user ? (
             <div className="navbar-user">
               {session.user.image && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={session.user.image}
                   alt={session.user.name || 'User'}

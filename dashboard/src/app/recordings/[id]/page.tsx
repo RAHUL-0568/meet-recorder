@@ -25,7 +25,7 @@ interface Recording {
 }
 
 export default function RecordingPlaybackPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const params = useParams();
   const router = useRouter();
   const [recording, setRecording] = useState<Recording | null>(null);
@@ -33,17 +33,6 @@ export default function RecordingPlaybackPage() {
   const [error, setError] = useState<string | null>(null);
 
   const id = params?.id as string;
-
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/");
-      return;
-    }
-
-    if (status === "authenticated" && id) {
-      fetchRecording();
-    }
-  }, [status, id]);
 
   const fetchRecording = async () => {
     try {
@@ -54,12 +43,25 @@ export default function RecordingPlaybackPage() {
       } else {
         setError("Recording not found");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to load recording");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/");
+      return;
+    }
+
+    if (status === "authenticated" && id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchRecording();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, router, status]);
 
   if (loading) {
     return (

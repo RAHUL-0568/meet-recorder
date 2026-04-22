@@ -3,6 +3,7 @@ let recordedChunks = [];
 let startTime = null;
 let finalStream = null;
 let audioContext = null; // ✅ ADD THIS
+const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.target !== "offscreen") return;
@@ -100,12 +101,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           // ☁️ UPLOAD TO SUPABASE BUCKET FIRST (before signaling complete)
           let uploaded = false;
           try {
+            const { dashboardOrigin } = await chrome.storage.local.get("dashboardOrigin");
+            const dashboardBaseUrl = dashboardOrigin || DEFAULT_DASHBOARD_ORIGIN;
             const formData = new FormData();
             formData.append("file", blob, filename);
             formData.append("title", "Google Meet Recording");
             formData.append("duration", recDuration);
 
-            const res = await fetch("http://localhost:3000/api/recordings", {
+            const res = await fetch(`${dashboardBaseUrl}/api/recordings`, {
               method: "POST",
               body: formData,
               credentials: "include",

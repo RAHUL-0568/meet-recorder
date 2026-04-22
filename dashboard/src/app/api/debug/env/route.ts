@@ -8,6 +8,14 @@ function mask(value: string | undefined | null) {
 }
 
 export async function GET() {
+  const debugEnabled =
+    process.env.NODE_ENV !== 'production' ||
+    process.env.ENABLE_DEBUG_ENV_ENDPOINT === 'true';
+
+  if (!debugEnabled) {
+    return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
+  }
+
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const nextAuthUrl = process.env.NEXTAUTH_URL;

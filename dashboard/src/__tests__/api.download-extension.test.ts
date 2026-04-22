@@ -19,14 +19,16 @@ const mockArchiveDirectory = jest.fn();
 const mockArchiveFinalize = jest.fn();
 let capturedDataHandler: ((chunk: Uint8Array) => void) | null = null;
 let capturedEndHandler: (() => void) | null = null;
-let capturedErrorHandler: ((err: Error) => void) | null = null;
+type ArchiverHandler =
+  | ((chunk: Uint8Array) => void)
+  | (() => void)
+  | ((err: Error) => void);
 
 jest.mock('archiver', () => {
   return jest.fn(() => ({
-    on: jest.fn((event: string, cb: Function) => {
+    on: jest.fn((event: string, cb: ArchiverHandler) => {
       if (event === 'data') capturedDataHandler = cb as (chunk: Uint8Array) => void;
       if (event === 'end') capturedEndHandler = cb as () => void;
-      if (event === 'error') capturedErrorHandler = cb as (err: Error) => void;
     }),
     directory: mockArchiveDirectory,
     finalize: mockArchiveFinalize.mockImplementation(() => {
@@ -44,7 +46,6 @@ describe('GET /api/download-extension', () => {
     jest.clearAllMocks();
     capturedDataHandler = null;
     capturedEndHandler = null;
-    capturedErrorHandler = null;
   });
 
   test('returns 404 when extension folder does not exist', async () => {
