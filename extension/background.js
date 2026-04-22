@@ -1,7 +1,5 @@
-// background.js (FINAL CLEAN VERSION + AUTH + STATE PERSISTENCE)
-
 const OFFSCREEN_DOCUMENT_PATH = "offscreen.html";
-const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
+const DEFAULT_DASHBOARD_ORIGIN = "https://meet-recorder-mo5b.vercel.app/";
 
 let recording = false;
 let recordingTabId = null;
@@ -13,13 +11,17 @@ let totalPausedMs = 0;
 // -------------------- INIT --------------------
 chrome.runtime.onInstalled.addListener(async (details) => {
   const existing = await chrome.storage.local.get(["recordings"]);
-  const dashboardOriginState = await chrome.storage.local.get(["dashboardOrigin"]);
+  const dashboardOriginState = await chrome.storage.local.get([
+    "dashboardOrigin",
+  ]);
 
   if (!existing.recordings) {
     await chrome.storage.local.set({ recordings: [] });
   }
   if (!dashboardOriginState.dashboardOrigin) {
-    await chrome.storage.local.set({ dashboardOrigin: DEFAULT_DASHBOARD_ORIGIN });
+    await chrome.storage.local.set({
+      dashboardOrigin: DEFAULT_DASHBOARD_ORIGIN,
+    });
   }
 
   // Clear stale recording state on install/update
@@ -90,7 +92,8 @@ async function restoreRecordingState() {
 // -------------------- AUTH CHECK --------------------
 async function isUserLoggedIn() {
   try {
-    const { dashboardOrigin } = await chrome.storage.local.get("dashboardOrigin");
+    const { dashboardOrigin } =
+      await chrome.storage.local.get("dashboardOrigin");
     const dashboardBaseUrl = dashboardOrigin || DEFAULT_DASHBOARD_ORIGIN;
 
     // Check for next-auth session cookie via chrome.cookies API
@@ -344,7 +347,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
           sendResponse({ success: true });
         } catch (error) {
-          sendResponse({ success: false, error: error?.message || "Failed to sync dashboard origin" });
+          sendResponse({
+            success: false,
+            error: error?.message || "Failed to sync dashboard origin",
+          });
         }
       })();
       return true;
