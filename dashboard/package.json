@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest --forceExit"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
@@ -25,11 +26,16 @@
     "wavesurfer.js": "^7.12.6"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "jest": "^30.3.0",
+    "jest-environment-node": "^30.3.0",
+    "jest-junit": "^16.0.0",
+    "ts-jest": "^29.4.9",
     "typescript": "^5"
   }
 }
