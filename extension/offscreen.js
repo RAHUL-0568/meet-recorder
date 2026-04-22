@@ -3,7 +3,7 @@ let recordedChunks = [];
 let startTime = null;
 let finalStream = null;
 let audioContext = null; // ✅ ADD THIS
-const DEFAULT_DASHBOARD_ORIGIN = "http://localhost:3000";
+const DEFAULT_DASHBOARD_ORIGIN = "https://meet-recorder-mo5b.vercel.app";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.target !== "offscreen") return;
