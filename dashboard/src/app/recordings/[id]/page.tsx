@@ -2,13 +2,13 @@
 // Single Recording Playback Page
 // ============================================================
 
-'use client';
+"use client";
 
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import AudioPlayer from '@/components/AudioPlayer';
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import AudioPlayer from "@/components/AudioPlayer";
 
 interface Recording {
   id: string;
@@ -35,12 +35,12 @@ export default function RecordingPlaybackPage() {
   const id = params?.id as string;
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/');
+    if (status === "unauthenticated") {
+      router.push("/");
       return;
     }
 
-    if (status === 'authenticated' && id) {
+    if (status === "authenticated" && id) {
       fetchRecording();
     }
   }, [status, id]);
@@ -52,10 +52,10 @@ export default function RecordingPlaybackPage() {
         const data = await res.json();
         setRecording(data.recording);
       } else {
-        setError('Recording not found');
+        setError("Recording not found");
       }
     } catch (err) {
-      setError('Failed to load recording');
+      setError("Failed to load recording");
     } finally {
       setLoading(false);
     }
@@ -64,10 +64,33 @@ export default function RecordingPlaybackPage() {
   if (loading) {
     return (
       <div className="playback-container">
-        <div style={{ animation: 'shimmer 1.5s infinite' }}>
-          <div style={{ width: 100, height: 14, background: 'var(--bg-elevated)', borderRadius: 4, marginBottom: 24 }} />
-          <div style={{ width: '60%', height: 28, background: 'var(--bg-elevated)', borderRadius: 4, marginBottom: 40 }} />
-          <div style={{ width: '100%', height: 200, background: 'var(--bg-card)', borderRadius: 16 }} />
+        <div style={{ animation: "shimmer 1.5s infinite" }}>
+          <div
+            style={{
+              width: 100,
+              height: 14,
+              background: "var(--bg-elevated)",
+              borderRadius: 4,
+              marginBottom: 24,
+            }}
+          />
+          <div
+            style={{
+              width: "60%",
+              height: 28,
+              background: "var(--bg-elevated)",
+              borderRadius: 4,
+              marginBottom: 40,
+            }}
+          />
+          <div
+            style={{
+              width: "100%",
+              height: 200,
+              background: "var(--bg-card)",
+              borderRadius: 16,
+            }}
+          />
         </div>
       </div>
     );
@@ -77,9 +100,13 @@ export default function RecordingPlaybackPage() {
     return (
       <div className="playback-container">
         <div className="empty-page-state">
-          <h2>{error || 'Recording not found'}</h2>
+          <h2>{error || "Recording not found"}</h2>
           <p>This recording may have been deleted.</p>
-          <Link href="/recordings" className="btn-secondary" style={{ marginTop: 16 }}>
+          <Link
+            href="/recordings"
+            className="btn-secondary"
+            style={{ marginTop: 16 }}
+          >
             ← Back to Recordings
           </Link>
         </div>
@@ -88,15 +115,15 @@ export default function RecordingPlaybackPage() {
   }
 
   const date = new Date(recording.createdAt);
-  const dateStr = date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
+  const dateStr = date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
-  const timeStr = date.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
+  const timeStr = date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return (
@@ -104,7 +131,14 @@ export default function RecordingPlaybackPage() {
       {/* Header */}
       <div className="playback-header">
         <Link href="/recordings" className="playback-back">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M19 12H5" />
             <polyline points="12,19 5,12 12,5" />
           </svg>
@@ -114,7 +148,9 @@ export default function RecordingPlaybackPage() {
         <h1>{recording.title}</h1>
 
         <div className="playback-meta">
-          <span>{dateStr} at {timeStr}</span>
+          <span>
+            {dateStr} at {timeStr}
+          </span>
           <span>•</span>
           <span>{formatDuration(recording.duration)}</span>
           <span>•</span>
@@ -122,7 +158,9 @@ export default function RecordingPlaybackPage() {
           {recording.meetingCode && (
             <>
               <span>•</span>
-              <span style={{ color: 'var(--cyan)' }}>{recording.meetingCode}</span>
+              <span style={{ color: "var(--cyan)" }}>
+                {recording.meetingCode}
+              </span>
             </>
           )}
         </div>
@@ -134,7 +172,14 @@ export default function RecordingPlaybackPage() {
       {/* Transcript Section */}
       <div className="transcript-section">
         <h2>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14,2 14,8 20,8" />
             <line x1="16" y1="13" x2="8" y2="13" />
@@ -145,8 +190,16 @@ export default function RecordingPlaybackPage() {
 
         {recording.summary ? (
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Summary</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
+              Summary
+            </h3>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: 14,
+                lineHeight: 1.7,
+              }}
+            >
               {recording.summary}
             </p>
           </div>
@@ -154,8 +207,17 @@ export default function RecordingPlaybackPage() {
 
         {recording.keyPoints && recording.keyPoints.length > 0 ? (
           <div style={{ marginTop: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Key Points</h3>
-            <ul style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.8, paddingLeft: 20 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
+              Key Points
+            </h3>
+            <ul
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: 14,
+                lineHeight: 1.8,
+                paddingLeft: 20,
+              }}
+            >
               {recording.keyPoints.map((point, i) => (
                 <li key={i}>{point}</li>
               ))}
@@ -165,21 +227,40 @@ export default function RecordingPlaybackPage() {
 
         {recording.transcript ? (
           <div style={{ marginTop: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Full Transcript</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
+              Full Transcript
+            </h3>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: 14,
+                lineHeight: 1.7,
+                whiteSpace: "pre-wrap",
+              }}
+            >
               {recording.transcript}
             </p>
           </div>
         ) : (
           <div className="transcript-placeholder">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: 'var(--text-muted)', marginBottom: 8 }}>
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              style={{ color: "var(--text-muted)", marginBottom: 8 }}
+            >
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
               <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
               <line x1="12" y1="19" x2="12" y2="23" />
               <line x1="8" y1="23" x2="16" y2="23" />
             </svg>
             <p>AI transcription & summary coming soon.</p>
-            <p style={{ fontSize: 12, marginTop: 4 }}>This feature will be available in Phase 3.</p>
+            <p style={{ fontSize: 12, marginTop: 4 }}>
+              This feature will be available in Phase 3.
+            </p>
           </div>
         )}
       </div>
@@ -198,9 +279,9 @@ function formatDuration(seconds: number): string {
 }
 
 function formatBytes(bytes: number): string {
-  if (!bytes) return '0 B';
+  if (!bytes) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
